@@ -1,13 +1,13 @@
 package com.sparender;
 
+import org.eclipse.jetty.server.Server;
+
 import java.io.BufferedReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.jetty.server.Server;
 
 /**
  * Main class used for debug / IDE Launch Verticle with docker instead (try this
@@ -23,8 +23,7 @@ public class App {
 
 	public static void main(String[] args) throws Exception {
 
-		Path path = null;
-		path = Paths.get("config.properties");
+		Path path = Paths.get("config.properties");
 
 		try (BufferedReader br = Files.newBufferedReader(path)) {
 			br.lines().filter(l -> !l.isEmpty()).filter(l -> !l.startsWith("#")).forEach(l -> {

@@ -1,13 +1,13 @@
 package com.sparender;
 
-import java.io.IOException;
-
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spf4j.recyclable.ObjectCreationException;
 import org.spf4j.recyclable.RecyclingSupplier;
 import org.spf4j.recyclable.impl.RecyclingSupplierBuilder;
+
+import java.io.IOException;
 
 /**
  * Simple HTTP Server that renders HTML pages using Selenium.
@@ -24,7 +24,7 @@ public class SeleniumRenderer {
 	RecyclingSupplier<WebDriver> driverPool = null;
 
 	private int MAX_ATTEMPTS = 10;
-	private int POOL_INITIAL_SIZE = 3;
+	private int POOL_INITIAL_SIZE = Integer.parseInt(App.prop.get("driver.pool"));
 	private int POOL_MAX_SIZE = POOL_INITIAL_SIZE;
 	
 	public SeleniumRenderer() {
