@@ -43,11 +43,12 @@
 			<artifactId>gelfclient</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.spf4j/spf4j-core -->
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-pool2 -->
 		<dependency>
-			<groupId>org.spf4j</groupId>
-			<artifactId>spf4j-core</artifactId>
-			<version>8.2.11</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-pool2</artifactId>
+			<version>2.2</version>
 		</dependency>
 
 	</dependencies>
