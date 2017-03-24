@@ -6,6 +6,7 @@ services:
       - "8082:8082"
     volumes:
       - "./cache:/home/cache"
+      - "./shm:/dev/shm"
     links:
       - selenium
   selenium:
