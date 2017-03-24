@@ -1,17 +1,16 @@
 package com.sparender;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class RequestHandler extends AbstractHandler implements Handler {
 
@@ -54,16 +53,15 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		} else {
 
 			try {
-
 				if (!cache.contentExists(requestUrl)) {
+					LOGGER.info("Requesting Selenium to render page " + requestUrl);
 					content = seleniumRenderer.render(requestUrl);
 					cache.putContent(requestUrl, content);
 					cacheHit = false;
-				}else {
+				} else {
+					LOGGER.info("Hitting the cache for page " + requestUrl);
 					content = cache.getContent(requestUrl);
 				}
-
-
 			} catch (Exception e) {
 				cacheHit = false;
 				e.printStackTrace();
