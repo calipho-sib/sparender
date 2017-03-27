@@ -6,12 +6,13 @@ services:
       - "8082:8082"
     volumes:
       - "./cache:/home/cache"
-      - "./shm:/dev/shm"
     links:
       - selenium
   selenium:
     image: "selenium/standalone-chrome"
     ports:
       - "4444:4444"
+    volumes:
+      - "./shm:/dev/shm"
     extra_hosts:
        - "www.google-analytics.com:127.0.0.1"
