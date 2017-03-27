@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SeleniumRenderer {
 
-	private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
+	//private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
 	private static final int POOL_MAX_SIZE = Integer.parseInt(App.prop.get("driver.pool.max"));
 	private static final String BASE_URL = App.prop.get("base.url");
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestLogger.class);
@@ -30,12 +30,13 @@ public class SeleniumRenderer {
 	// private final ObjectPool<RemoteWebDriver> driverPool;
 
 	public SeleniumRenderer() {
-		executor = Executors.newFixedThreadPool(POOL_MAX_SIZE);
+		//executor = Executors.newFixedThreadPool(POOL_MAX_SIZE);
 		// driverPool = buildDriverPool();
 	}
 
 	public String render(final String requestedUrl) throws Exception {
-		try {
+		return render(requestedUrl);
+		/*try {
 
 			return executor.submit(() -> {
 				return render(requestedUrl, 0);
@@ -43,8 +44,7 @@ public class SeleniumRenderer {
 			
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw new RuntimeException("Timeout reached to render for " + requestedUrl);
-		}
-
+		}*/
 	}
 
 	/*
@@ -75,7 +75,7 @@ public class SeleniumRenderer {
 
 		if (cnt > 0) {
 
-			if (cnt > 10) {
+			if (cnt > 4) {
 				LOGGER.error("Failed to render the page " + requestedUrl);
 				throw new RuntimeException("Failed to render the page" + requestedUrl);
 			}
@@ -99,7 +99,7 @@ public class SeleniumRenderer {
 
 			LOGGER.info("Web driver " + webDriver.getSessionId() + " is getting content for " + requestedUrl);
 
-			sleep(TIME_TO_WAIT_FOR_RENDER);
+			//sleep(TIME_TO_WAIT_FOR_RENDER);
 
 			LOGGER.info("Web driver " + webDriver.getSessionId() + "  finished rendering " + requestedUrl + " in "
 					+ (System.currentTimeMillis() - start) + " ms");
