@@ -59,12 +59,12 @@ public class SeleniumRenderer {
 		if (webDriver != null) {
 			try {
 				String sessionId = webDriver.getSessionId().toString();
-				LOGGER.warn("Trying to quit" +  sessionId);
+				LOGGER.info("Trying to quit" +  sessionId);
 				webDriver.quit();
-				LOGGER.warn("Web driver " +  sessionId + " sucessfully quitted");
+				LOGGER.info("Web driver " +  sessionId + " sucessfully quitted");
 
 			} catch (Exception e2) {
-				LOGGER.warn("Fails to properly quie driver with session " + webDriver.getSessionId() + ": "
+				LOGGER.error("Fails to properly quie driver with session " + webDriver.getSessionId() + ": "
 						+ e2.getMessage());
 			}
 
