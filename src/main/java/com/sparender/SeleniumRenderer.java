@@ -39,7 +39,7 @@ public class SeleniumRenderer {
 
 			return executor.submit(() -> {
 				return render(requestedUrl, 0);
-			}).get(2, TimeUnit.MINUTES);
+			}).get(10, TimeUnit.MINUTES);
 			
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw new RuntimeException("Timeout reached to render for " + requestedUrl);
