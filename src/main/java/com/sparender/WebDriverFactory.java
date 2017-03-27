@@ -1,5 +1,8 @@
 package com.sparender;
 
+import java.net.URL;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -7,9 +10,6 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URL;
-import java.util.concurrent.TimeUnit;
 
 public class WebDriverFactory extends BasePooledObjectFactory<RemoteWebDriver> {
 
@@ -20,7 +20,7 @@ public class WebDriverFactory extends BasePooledObjectFactory<RemoteWebDriver> {
 	public RemoteWebDriver create() throws Exception {
 
 		RemoteWebDriver driver = new RemoteWebDriver(new URL(SELENIUM_URL), DesiredCapabilities.chrome());
-		driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+		//driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
 		driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.MINUTES);
 		LOGGER.info("Creating new remote driver: session "+driver.getSessionId());
 		return driver;
