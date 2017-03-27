@@ -35,7 +35,7 @@ public class SeleniumRenderer {
 	}
 
 	public String render(final String requestedUrl) throws Exception {
-		return render(requestedUrl);
+		return render(requestedUrl, 0);
 		/*try {
 
 			return executor.submit(() -> {
