@@ -1,13 +1,8 @@
 package com.sparender;
 
-import java.net.URL;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.openqa.selenium.remote.DesiredCapabilities;
+import org.apache.commons.pool2.ObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPool;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,117 +13,72 @@ import org.slf4j.LoggerFactory;
  */
 public class SeleniumRenderer {
 
-	//private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
+	private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
 	private static final int POOL_MAX_SIZE = Integer.parseInt(App.prop.get("driver.pool.max"));
 	private static final String BASE_URL = App.prop.get("base.url");
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestLogger.class);
 
-	private static ExecutorService executor;
-
-	static final String SELENIUM_URL = App.prop.get("selenium.url");
-
-	// private final ObjectPool<RemoteWebDriver> driverPool;
+	private final ObjectPool<RemoteWebDriver> driverPool;
 
 	public SeleniumRenderer() {
-		//executor = Executors.newFixedThreadPool(POOL_MAX_SIZE);
-		// driverPool = buildDriverPool();
+
+		GenericObjectPoolConfig config = new GenericObjectPoolConfig();
+		config.setMaxTotal(POOL_MAX_SIZE);
+		driverPool = new GenericObjectPool<>(new WebDriverFactory(), config);
 	}
 
 	public String render(final String requestedUrl) throws Exception {
-		return render(requestedUrl, 0);
-		/*try {
-
-			return executor.submit(() -> {
-				return render(requestedUrl, 0);
-			}).get(10, TimeUnit.MINUTES);
-			
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
-			throw new RuntimeException("Timeout reached to render for " + requestedUrl);
-		}*/
-	}
-
-	/*
-	 * private GenericObjectPool<RemoteWebDriver> buildDriverPool() {
-	 * GenericObjectPoolConfig config = new GenericObjectPoolConfig();
-	 * config.setMaxTotal(POOL_MAX_SIZE); return new GenericObjectPool<>(new
-	 * WebDriverFactory(), config); }
-	 */
-
-	private void tryToCloseWebDriver(RemoteWebDriver webDriver) {
-
-		if (webDriver != null) {
-			try {
-				String sessionId = webDriver.getSessionId().toString();
-				LOGGER.info("Trying to quit" +  sessionId);
-				webDriver.quit();
-				LOGGER.info("Web driver " +  sessionId + " sucessfully quitted");
-
-			} catch (Exception e2) {
-				LOGGER.error("Fails to properly quie driver with session " + webDriver.getSessionId() + ": "
-						+ e2.getMessage());
-			}
-
-		}
-	}
-
-	public String render(final String requestedUrl, int cnt) throws Exception {
-
-		if (cnt > 0) {
-
-			if (cnt > 4) {
-				LOGGER.error("Failed to render the page " + requestedUrl);
-				throw new RuntimeException("Failed to render the page" + requestedUrl);
-			}
-
-			LOGGER.warn("Trying again for " + requestedUrl + " waiting " + cnt + " seconds");
-			sleep(cnt * 1000);
-		}
 
 		RemoteWebDriver webDriver = null;
 
 		try {
-
 			final long start = System.currentTimeMillis();
 
-			LOGGER.info("Trying to create a new web driver for " + requestedUrl);
-			webDriver = new RemoteWebDriver(new URL(SELENIUM_URL), DesiredCapabilities.chrome());
-
-			LOGGER.info("Web driver " + webDriver.getSessionId() + " sucessfully created for " + requestedUrl);
+			LOGGER.info("Trying to borrow a driver from the pool...");
+			webDriver = driverPool.borrowObject();
+			LOGGER.info("Got the web driver " + webDriver.getSessionId());
 
 			webDriver.get(requestedUrl);
 
-			LOGGER.info("Web driver " + webDriver.getSessionId() + " is getting content for " + requestedUrl);
+			sleep(TIME_TO_WAIT_FOR_RENDER);
 
-			//sleep(TIME_TO_WAIT_FOR_RENDER);
-
-			LOGGER.info("Web driver " + webDriver.getSessionId() + "  finished rendering " + requestedUrl + " in "
-					+ (System.currentTimeMillis() - start) + " ms");
-
+			LOGGER.info("Selenium finished rendering " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms");
 			String content = updatePageSource(webDriver.getPageSource());
 
-			LOGGER.info("Web driver " + webDriver.getSessionId() + "  will return content for " + requestedUrl);
+			LOGGER.info("Returning driver " +  webDriver.getSessionId() + " to the pool");
+			driverPool.returnObject(webDriver);
 
 			return content;
-
-		} catch (Exception e) {
-
-			LOGGER.warn("Try " + cnt + " for " + requestedUrl + " failed, session " + webDriver.getSessionId()
-					+ " failed: " + e.getMessage());
-			return render(requestedUrl, cnt++);
-
-		} finally {
-			tryToCloseWebDriver(webDriver);
 		}
+		catch (Exception e) {
 
+			if (webDriver != null) {
+
+				LOGGER.error("Session " + webDriver.getSessionId() + " died: " + e.getMessage());
+				driverPool.invalidateObject(webDriver);
+
+				try {
+					webDriver.close();
+					webDriver.quit();
+				}
+				catch (Exception e2) {
+					LOGGER.error("Fails to properly close session " + webDriver.getSessionId() + ": " + e2.getMessage());
+				}
+				return render(requestedUrl);
+			}
+
+			throw e;
+		}
 	}
 
 	private static String updatePageSource(String content) {
 
 		String contentWithoutJs = content.replaceAll("<script(.|\n)*?</script>", "");
 		String contentWithoutJsAndHtmlImport = contentWithoutJs.replaceAll("<link rel=\"import\".*/>", "");
-		String contentWithoutJsAndHtmlImportAndIframes = contentWithoutJsAndHtmlImport.replaceAll("<iframe .*</iframe>",
-				"");
-		return contentWithoutJsAndHtmlImportAndIframes.replaceAll("(<base.*?>)", "<base href=\"" + BASE_URL + "\"/>");
+		String contentWithoutJsAndHtmlImportAndIframes = contentWithoutJsAndHtmlImport
+				.replaceAll("<iframe .*</iframe>", "");
+		return contentWithoutJsAndHtmlImportAndIframes.replaceAll("(<base.*?>)",
+				"<base href=\"" + BASE_URL + "\"/>");
 	}
 
 	private static void sleep(long ms) {
