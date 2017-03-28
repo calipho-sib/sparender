@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
  * Simple HTTP Server that renders HTML pages using Selenium.
  * 
  */
-public class SeleniumRendererProto {
+public class SeleniumRendererProto implements Renderer {
 
 	//private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
 	private static final int POOL_MAX_SIZE = Integer.parseInt(App.prop.get("driver.pool.max"));
@@ -30,6 +30,7 @@ public class SeleniumRendererProto {
 		// driverPool = buildDriverPool();
 	}
 
+	@Override
 	public String render(final String requestedUrl) throws Exception {
 		return render(requestedUrl, 0);
 		/*try {

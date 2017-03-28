@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * Simple HTTP Server that renders HTML pages using Selenium.
  * 
  */
-public class SeleniumRenderer {
+public class SeleniumRenderer implements Renderer {
 
 	private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
 	private static final int POOL_MAX_SIZE = Integer.parseInt(App.prop.get("driver.pool.max"));
@@ -27,6 +27,7 @@ public class SeleniumRenderer {
 		driverPool = new GenericObjectPool<>(new WebDriverFactory(), config);
 	}
 
+	@Override
 	public String render(final String requestedUrl) throws Exception {
 
 		RemoteWebDriver webDriver = null;
