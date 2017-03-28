@@ -16,14 +16,17 @@ public class RequestHandler extends AbstractHandler implements Handler {
 
 	final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
-	private Renderer renderer;
-	private RequestLogger logger;
-	private ContentCache cache;
+	private final Renderer renderer;
+	private final RequestLogger logger;
+	private final ContentCache cache;
+	private final Boolean cacheEnabled;
 
 	public RequestHandler() {
 		cache = new ContentCache();
 		renderer = new SeleniumRenderer(); // new SeleniumRendererProto();
 		logger = new RequestLogger();
+		cacheEnabled = Boolean.valueOf(App.prop.get("cache.enabled"));
+		LOGGER.info("Cache " + ((cacheEnabled) ? "enabled" : "disabled") );
 	}
 
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
@@ -53,7 +56,7 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		} else {
 
 			try {
-				if (!cache.contentExists(requestUrl)) {
+				if (!cacheEnabled || !cache.contentExists(requestUrl)) {
 					LOGGER.info("Requesting Selenium to render page " + requestUrl);
 					content = renderer.render(requestUrl);
 					cache.putContent(requestUrl, content);
