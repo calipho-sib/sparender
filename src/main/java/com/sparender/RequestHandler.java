@@ -41,7 +41,10 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		PrintWriter out = response.getWriter();
 		String content = null;
 
-		final String requestUrl = getFullURL(request).substring(1).replace("?_escaped_fragment_=", "");
+		final String requestUrl = getFullURL(request).substring(1)
+				.replace("?_escaped_fragment_=", "")
+				.replace("&_escaped_fragment_=", "")
+				;
 
 		logger.logBefore(request, requestUrl);
 
