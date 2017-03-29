@@ -47,7 +47,15 @@ public class RequestLogger {
 		this.transport = GelfTransports.create(config);
 	}
 
-	public void log(HttpServletRequest request, HttpServletResponse response, String fullUrl, Integer contentLength, Integer bytes, boolean cacheHit, long startTime, String errorMessage){
+	public void logAfter(HttpServletRequest request, HttpServletResponse response, String fullUrl, Integer contentLength, Integer bytes, boolean cacheHit, long startTime, String errorMessage){
+		log(false, request, response.getStatus(), fullUrl, contentLength, bytes, cacheHit, startTime, errorMessage);
+	}
+
+	public void logBefore(HttpServletRequest request, String fullUrl){
+		log(true, request, null, fullUrl, 0, 0, false, System.currentTimeMillis(), null);
+	}
+
+	private void log(boolean before, HttpServletRequest request, Integer status, String fullUrl, Integer contentLength, Integer bytes, boolean cacheHit, long startTime, String errorMessage){
 
 		try {
 			
@@ -60,7 +68,6 @@ public class RequestLogger {
 
 			String versionFormatted = "-";
 			
-			int status = response.getStatus();
 			String message = null;
 
 			String referrer = request.getHeader("referrer");
@@ -73,6 +80,8 @@ public class RequestLogger {
 
 			keyValueFields.put("remoteClient", remoteClient);
 			keyValueFields.put("method", method);
+			keyValueFields.put("before", before);
+			keyValueFields.put("after", !before);
 			keyValueFields.put("full-url", fullUrl);
 			keyValueFields.put("versionFormatted", versionFormatted);
 			keyValueFields.put("content-length", contentLength);
@@ -94,7 +103,10 @@ public class RequestLogger {
 
 			keyValueFields.put("status", status);
 
-			if (status >= 500) {
+			if (status == null) {
+			    message += message + " LOGGED BEFORE PROCESSING REQUEST";
+				LOGGER.info(message);
+			}else if (status >= 500) {
 				LOGGER.error(message);
 				keyValueFields.put("level", "error");
 			} else if (status >= 400) {

@@ -43,6 +43,8 @@ public class RequestHandler extends AbstractHandler implements Handler {
 
 		final String requestUrl = getFullURL(request).substring(1).replace("?_escaped_fragment_=", "");
 
+		logger.logBefore(request, requestUrl);
+
 		if (!requestUrl.startsWith("http")) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			if (!requestUrl.startsWith("favicon.ico")) {
@@ -84,7 +86,7 @@ public class RequestHandler extends AbstractHandler implements Handler {
 			bytes = content.getBytes("UTF-8").length;
 		}
 
-		logger.log(request, response, requestUrl, contentLength, bytes, cacheHit, start, errorMessage);
+		logger.logAfter(request, response, requestUrl, contentLength, bytes, cacheHit, start, errorMessage);
 
 		baseRequest.setHandled(true);
 	}
