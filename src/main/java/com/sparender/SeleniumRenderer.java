@@ -1,5 +1,8 @@
 package com.sparender;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -76,11 +79,43 @@ public class SeleniumRenderer implements Renderer {
 
 	private static String updatePageSource(String requestedUrl, String content, String baseUrl) {
 
-		String contentWithoutJs = content.replaceAll("<script(.|\n)*?</script>", "");
-		//String contentWithoutSytle = contentWithoutJs.replaceAll("<style(.|\n)*?</style>", "");
+		content = content.replaceAll("<style[^¿]+?<\\/style>", "");
 
-		String contentWithoutJsAndHtmlImportAndIframes = contentWithoutJs.replaceAll("<link rel=\"import\".*/>", "");
-		return contentWithoutJsAndHtmlImportAndIframes.replaceAll("(<base.*?>)", "<base href=\"" + baseUrl + "\"/>");
+		String cssRegex = "<style[^¿]+?<\\/style>";
+		
+		String css = getAllCss(content, cssRegex);
+		
+		content = content.replaceAll(cssRegex, "");
+		
+		//String contentWithoutSytle = contentWithoutJs.replaceAll("", "");
+
+		//Remove all comments
+		content = content.replaceAll("<!--[^¿]+?-->", "");
+
+		//Remove all iframes
+		content = content.replaceAll("<link rel=\"import\".*/>", "");
+
+		//Replace with good base
+		content = content.replaceAll("(<base.*?>)", "<base href=\"" + baseUrl + "\"/>");
+
+		//Put the css at the end
+		content += "\n" + css;
+		
+		return content;
+	}
+	
+	private static String getAllCss(String content, String cssRegex){
+		StringBuffer sb = new StringBuffer();
+	    Pattern p = Pattern.compile(cssRegex);
+
+	    Matcher matcher = p.matcher(content);
+	    while (matcher.find())
+	    {
+	    	String match = matcher.group();
+	    	sb.append(match);
+	    }
+	    
+	    return sb.toString().replaceAll("\\s+", " ");
 	}
 
 	//From here: http://stackoverflow.com/questions/4308554/simplest-way-to-read-json-from-a-url-in-java

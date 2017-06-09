@@ -7,14 +7,18 @@ Build
 ```
 mvn package
 ```
+```
 
-Run selenium server
+Access the machine  (nextp-vm2b)
+
+Run selenium server (nextp-vm2b)
 ```shell 
+docker ps (to kill any previous instance)
 docker run -d --rm --name chrome --shm-size=1024m --cap-add=SYS_ADMIN --add-host=old.nextprot.org:127.0.0.1 -p=127.0.0.1:4444:4444   yukinying/chrome-headless-browser-selenium
 ```
-Run sparender
+Run sparender (nextp-vm2b)
 ```
-java -Dehcache.path=/work/sparender/cache -jar app.jar
+nohup java -Dehcache.path=/work/sparender/cache -jar /work/sparender/dist/app.jar &> /work/sparender/logs.txt &
 ```
 
 Access your browser at: http://localhost:8082/http://alpha-search.nextprot.org/about/human-proteome for an example of plain html file
