@@ -25,10 +25,10 @@ public class StructuredJSONLDData {
 		StringBuffer sb = new StringBuffer();
 		sb.append("<script type=\"application/ld+json\">\n");
 		sb.append("{\n");
-		sb.append("\t\"@context\": \"" + context + "\"\n");
-		sb.append("\t\"@type\": \"" + type + "\"\n");
-		sb.append("\t\"url\": \"" + url + "\"\n");
-		sb.append("\t\"name\": \"" + name + "\"\n");
+		sb.append("\t\"@context\": \"" + context + "\",\n");
+		sb.append("\t\"@type\": \"" + type + "\",\n");
+		sb.append("\t\"url\": \"" + url + "\",\n");
+		sb.append("\t\"name\": \"" + name + "\",\n");
 		sb.append("\t\"description\": \"" + description + "\"\n");
 		sb.append("}\n");
 		sb.append("</script>");
