@@ -10,7 +10,7 @@ mvn package
 
 Run selenium server
 ```shell 
-docker run -it --rm --name chrome --shm-size=1024m --cap-add=SYS_ADMIN --add-host=old.nextprot.org:127.0.0.1 -p=127.0.0.1:4444:4444   yukinying/chrome-headless-browser-selenium
+docker run -d --rm --name chrome --shm-size=1024m --cap-add=SYS_ADMIN --add-host=old.nextprot.org:127.0.0.1 -p=127.0.0.1:4444:4444   yukinying/chrome-headless-browser-selenium
 ```
 Run sparender
 ```
