@@ -115,7 +115,8 @@ public class SeleniumRenderer implements Renderer {
 				//Append the line
 				sb.append(l + "\n");
 				if(l.contains("<header>")){ //Aftre header tag include the css
-					sb.append(css + "\n");
+					//Not adding css for now
+					//sb.append(css + "\n");
 				}
 
 			}
@@ -147,7 +148,6 @@ public class SeleniumRenderer implements Renderer {
 			URL u = new URL(url);
 			
 			String seoUrl = "https://api.nextprot.org/seo/tags" + u.getPath();
-			System.err.println(seoUrl);
 			tags = mapper.readValue(new URL(seoUrl), SeoTags.class);
 		} catch (IOException e) {
 			e.printStackTrace();
