@@ -23,7 +23,7 @@ public class RequestHandler extends AbstractHandler implements Handler {
 
 	public RequestHandler() {
 		cache = new ContentCache();
-		renderer = new SeleniumRenderer(); // new SeleniumRendererProto();
+		renderer = new SeleniumRenderer(); 
 		logger = new RequestLogger();
 		cacheEnabled = Boolean.valueOf(App.prop.get("cache.enabled"));
 		LOGGER.info("Cache " + ((cacheEnabled) ? "enabled" : "disabled") );

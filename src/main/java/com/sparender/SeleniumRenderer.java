@@ -1,15 +1,8 @@
 package com.sparender;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.charset.Charset;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.oracle.javafx.jmx.json.JSONException;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.json.simple.JSONObject;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +13,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SeleniumRenderer implements Renderer {
 
-	private static final Integer TIME_TO_WAIT_FOR_RENDER = 2000;
+	private static final Integer TIME_TO_WAIT_FOR_RENDER = 5000;
 	private static final int POOL_MAX_SIZE = Integer.parseInt(App.prop.get("driver.pool.max"));
 	private static final Logger LOGGER = LoggerFactory.getLogger(RequestLogger.class);
 
@@ -50,10 +43,14 @@ public class SeleniumRenderer implements Renderer {
 
 			sleep(TIME_TO_WAIT_FOR_RENDER);
 
-			LOGGER.info("Selenium finished rendering " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms");
-			String content = updatePageSource(requestedUrl, webDriver.getPageSource(), "https://www.nextprot.org");
+			LOGGER.info("Selenium finished rendering " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms for web driver " + webDriver.getSessionId());
+			
+			String source = webDriver.getPageSource();
+			
+			LOGGER.info("Got page source for " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms for web driver " + webDriver.getSessionId());
+			String content = updatePageSource(requestedUrl, source, "https://www.nextprot.org");
 
-			LOGGER.info("Returning driver " + webDriver.getSessionId() + " to the pool");
+			LOGGER.info("Updating page source in " + (System.currentTimeMillis() - start) + " ms and returning web driver " + webDriver.getSessionId() + " to the pool");
 			driverPool.returnObject(webDriver);
 
 			return content;
@@ -82,14 +79,13 @@ public class SeleniumRenderer implements Renderer {
 		String contentWithoutJs = content.replaceAll("<script(.|\n)*?</script>", "");
 		//String contentWithoutSytle = contentWithoutJs.replaceAll("<style(.|\n)*?</style>", "");
 
-		System.err.println(readJsonLDFromUrl(requestedUrl));
 		String contentWithoutJsAndHtmlImportAndIframes = contentWithoutJs.replaceAll("<link rel=\"import\".*/>", "");
 		return contentWithoutJsAndHtmlImportAndIframes.replaceAll("(<base.*?>)", "<base href=\"" + baseUrl + "\"/>");
 	}
 
 	//From here: http://stackoverflow.com/questions/4308554/simplest-way-to-read-json-from-a-url-in-java
 
-	public static String readJsonLDFromUrl(String url) {
+	/*public static String readJsonLDFromUrl(String url) {
 			ObjectMapper mapper = new ObjectMapper();
 		SeoTags tags;
 		try {
@@ -106,7 +102,7 @@ public class SeleniumRenderer implements Renderer {
 
 		System.err.println("BOUUUM");
 			return jsonld.toString();
-	}
+	}*/
 
 
 	private static void sleep(long ms) {
