@@ -18,7 +18,7 @@ docker run -d --rm --name chrome --shm-size=1024m --cap-add=SYS_ADMIN --add-host
 ```
 Run sparender (nextp-vm2b)
 ```
-nohup java -Dehcache.path=/work/sparender/cache -jar /work/sparender/dist/app.jar &> /work/sparender/logs.txt &
+nohup java -Xmx2g -Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dehcache.path=/work/sparender/cache -jar /work/sparender/dist/app.jar &> /work/sparender/logs.txt &
 ```
 
 Access your browser at: http://localhost:8082/http://alpha-search.nextprot.org/about/human-proteome for an example of plain html file
