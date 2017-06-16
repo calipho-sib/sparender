@@ -27,9 +27,9 @@ public class WebDriverFactory extends BasePooledObjectFactory<RemoteWebDriver> {
 
 		RemoteWebDriver driver = new RemoteWebDriver(new URL(SELENIUM_URL), dc);
 
-		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
-		driver.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
-		driver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
+		//driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		//driver.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
+		//driver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
 
 		LOGGER.info("Creating new remote driver: session "+driver.getSessionId());
 		return driver;
