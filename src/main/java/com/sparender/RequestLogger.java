@@ -4,12 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,22 +32,37 @@ public class RequestLogger {
 	final GelfConfiguration config;
 	final GelfTransport transport;
 
+	private RunningRequests runningRequests;
+
 	static final String GRAYLOG_HOST = App.prop.get("graylog.host").toString();
 	static final int GRAYLOG_PORT = Integer.valueOf(App.prop.get("graylog.port").toString());
 
-	public RequestLogger() {
+	public RequestLogger(RunningRequests runningRequests) {
+		this.runningRequests = runningRequests;
 		this.config = new GelfConfiguration(new InetSocketAddress(GRAYLOG_HOST, GRAYLOG_PORT)).transport(GelfTransports.UDP).queueSize(512).connectTimeout(5000).reconnectDelay(1000).tcpNoDelay(true)
 				.sendBufferSize(32768);
 
 		this.transport = GelfTransports.create(config);
 	}
 
-	public void logAfter(HttpServletRequest request, HttpServletResponse response, String fullUrl, Integer contentLength, Integer bytes, boolean cacheHit, long startTime, String errorMessage){
-		log(false, request, response.getStatus(), fullUrl, contentLength, bytes, cacheHit, startTime, errorMessage);
+
+	private static String getRunningRequestId (HttpServletRequest request){
+		return  request.getAttribute("startTime") + "\t" +
+				request.getRemoteHost() + "\t" +
+				request.getRequestURI() + "\t" +
+				request.hashCode() + "\t" +
+				request.getHeader("user-agent") + "\n";
 	}
 
 	public void logBefore(HttpServletRequest request, String fullUrl){
+		request.setAttribute("startTime", System.currentTimeMillis());
+		runningRequests.addRequest(getRunningRequestId(request));
 		log(true, request, null, fullUrl, 0, 0, false, System.currentTimeMillis(), null);
+	}
+
+	public void logAfter(HttpServletRequest request, HttpServletResponse response, String fullUrl, Integer contentLength, Integer bytes, boolean cacheHit, long startTime, String errorMessage){
+		runningRequests.removeRequest(getRunningRequestId(request));
+		log(false, request, response.getStatus(), fullUrl, contentLength, bytes, cacheHit, startTime, errorMessage);
 	}
 
 	private void log(boolean before, HttpServletRequest request, Integer status, String fullUrl, Integer contentLength, Integer bytes, boolean cacheHit, long startTime, String errorMessage){
@@ -92,7 +102,8 @@ public class RequestLogger {
 			keyValueFields.put("elpased-time-seconds", (int) ((elapsedTime / 1000.0)));
 			keyValueFields.put("hit-cache", cacheHit);
 			keyValueFields.put("error-message", errorMessage);
-			
+			keyValueFields.put("request-hashcode", request.hashCode());
+
 			Enumeration<String> requestHeaders = request.getHeaderNames();
 			while(requestHeaders.hasMoreElements()){
 				String headerName = requestHeaders.nextElement();

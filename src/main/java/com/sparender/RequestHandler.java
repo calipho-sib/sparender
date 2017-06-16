@@ -20,11 +20,13 @@ public class RequestHandler extends AbstractHandler implements Handler {
 	private final RequestLogger logger;
 	private final ContentCache cache;
 	private final Boolean cacheEnabled;
+	private final RunningRequests runningRequests;
 
 	public RequestHandler() {
+		runningRequests = new RunningRequests();
 		cache = new ContentCache();
 		renderer = new SeleniumRenderer(); 
-		logger = new RequestLogger();
+		logger = new RequestLogger(runningRequests);
 		cacheEnabled = Boolean.valueOf(App.prop.get("cache.enabled"));
 		LOGGER.info("Cache " + ((cacheEnabled) ? "enabled" : "disabled") );
 	}
@@ -41,12 +43,14 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		PrintWriter out = response.getWriter();
 		String content = null;
 
-		final String requestUrl = getFullURL(request).substring(1)
-				.replace("?_escaped_fragment_=", "")
-				.replace("&_escaped_fragment_=", "")
-				;
+		if (request.getRequestURI().equals("/requests")) {
+			response.setStatus(HttpServletResponse.SC_OK);
+			out.println(runningRequests.getRunningRequests());
+			baseRequest.setHandled(true);
+			return;
+		}
 
-		logger.logBefore(request, requestUrl);
+		final String requestUrl = Utils.getFullURL(request).substring(1).replace("?_escaped_fragment_=", "").replace("&_escaped_fragment_=", "");
 
 		if (!requestUrl.startsWith("http")) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -59,6 +63,8 @@ public class RequestHandler extends AbstractHandler implements Handler {
 			return;
 
 		} else {
+
+			logger.logBefore(request, requestUrl);
 
 			try {
 				if (!cacheEnabled || !cache.contentExists(requestUrl)) {
@@ -94,14 +100,5 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		baseRequest.setHandled(true);
 	}
 
-	private static String getFullURL(HttpServletRequest request) {
-		String requestURL = request.getPathInfo();
-		String queryString = request.getQueryString();
 
-		if (queryString == null) {
-			return requestURL.toString();
-		} else {
-			return requestURL + '?' + queryString;
-		}
-	}
 }
