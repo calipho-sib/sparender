@@ -3,9 +3,13 @@ package com.sparender;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.corba.se.spi.ior.ObjectKey;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -41,27 +45,30 @@ public class SeleniumRenderer implements Renderer {
 
 		try {
 
-			final long start = System.currentTimeMillis();
 
-			LOGGER.info("Trying to borrow a driver from the pool for ..." + requestedUrl);
-			webDriver = driverPool.borrowObject();
-			LOGGER.info("Got the web driver " + webDriver.getSessionId());
+				final long start = System.currentTimeMillis();
 
-			webDriver.get(requestedUrl);
+				LOGGER.info("Trying to borrow a driver from the pool for ..." + requestedUrl);
+				webDriver = driverPool.borrowObject();
+				LOGGER.info("Got the web driver " + webDriver.getSessionId());
 
-			sleep(TIME_TO_WAIT_FOR_RENDER);
+				webDriver.get(requestedUrl);
 
-			LOGGER.info("Selenium finished rendering " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms for web driver " + webDriver.getSessionId());
+				sleep(TIME_TO_WAIT_FOR_RENDER);
 
-			String source = webDriver.getPageSource();
+				LOGGER.info("Selenium finished rendering " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms for web driver " + webDriver.getSessionId());
 
-			LOGGER.info("Got page source for " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms for web driver " + webDriver.getSessionId());
-			String content = updatePageSource(requestedUrl, source, "https://www.nextprot.org");
+				String source = webDriver.getPageSource();
 
-			LOGGER.info("Updating page source in " + (System.currentTimeMillis() - start) + " ms and returning web driver " + webDriver.getSessionId() + " to the pool");
-			driverPool.returnObject(webDriver);
+				LOGGER.info("Got page source for " + requestedUrl + " in " + (System.currentTimeMillis() - start) + " ms for web driver " + webDriver.getSessionId());
+				String content = updatePageSource(requestedUrl, source, "https://www.nextprot.org");
 
-			return content;
+				LOGGER.info("Updating page source in " + (System.currentTimeMillis() - start) + " ms and returning web driver " + webDriver.getSessionId() + " to the pool");
+				driverPool.returnObject(webDriver);
+
+				return content;
+
+
 		} catch (Exception e) {
 
 			if (webDriver != null) {

@@ -11,6 +11,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestHandler extends AbstractHandler implements Handler {
 
@@ -21,6 +24,7 @@ public class RequestHandler extends AbstractHandler implements Handler {
 	private final ContentCache cache;
 	private final Boolean cacheEnabled;
 	private final RunningRequests runningRequests;
+	private Map<String, Object> lockedUrls;
 
 	public RequestHandler() {
 		runningRequests = new RunningRequests();
@@ -29,6 +33,8 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		logger = new RequestLogger(runningRequests);
 		cacheEnabled = Boolean.valueOf(App.prop.get("cache.enabled"));
 		LOGGER.info("Cache " + ((cacheEnabled) ? "enabled" : "disabled") );
+		lockedUrls = Collections.synchronizedMap(new HashMap<>());
+
 	}
 
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
@@ -66,22 +72,26 @@ public class RequestHandler extends AbstractHandler implements Handler {
 
 			logger.logBefore(request, requestUrl);
 
-			try {
-				if (!cacheEnabled || !cache.contentExists(requestUrl)) {
-					LOGGER.info("Requesting Selenium to render page " + requestUrl);
-					content = renderer.render(requestUrl);
-					cache.putContent(requestUrl, content);
+			synchronized (getLockingObject(requestUrl)){
+
+				try {
+					if (!cacheEnabled || !cache.contentExists(requestUrl)) {
+						LOGGER.info("Requesting Selenium to render page " + requestUrl);
+						content = renderer.render(requestUrl);
+						cache.putContent(requestUrl, content);
+						cacheHit = false;
+					} else {
+						LOGGER.info("Hitting the cache for page " + requestUrl);
+						content = cache.getContent(requestUrl);
+					}
+				} catch (Exception e) {
 					cacheHit = false;
-				} else {
-					LOGGER.info("Hitting the cache for page " + requestUrl);
-					content = cache.getContent(requestUrl);
+					e.printStackTrace();
+					errorMessage = e.getMessage();
+					response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+					out.println("Failed to render " + requestUrl + " " + e.getMessage());
 				}
-			} catch (Exception e) {
-				cacheHit = false;
-				e.printStackTrace();
-				errorMessage = e.getMessage();
-				response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-				out.println("Failed to render " + requestUrl + " " + e.getMessage());
+
 			}
 
 		}
@@ -98,6 +108,16 @@ public class RequestHandler extends AbstractHandler implements Handler {
 		logger.logAfter(request, response, requestUrl, contentLength, bytes, cacheHit, start, errorMessage);
 
 		baseRequest.setHandled(true);
+	}
+
+
+	private synchronized Object getLockingObject(String requestedUrl) {
+		//TODO evaluate the memory of this. Do we need to run a recycling here?
+		if(!lockedUrls.containsKey(requestedUrl)){
+			lockedUrls.put(requestedUrl, new Object());
+		}
+
+		return lockedUrls.get(requestedUrl);
 	}
 
 
