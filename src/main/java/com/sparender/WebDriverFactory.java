@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 public class WebDriverFactory extends BasePooledObjectFactory<RemoteWebDriver> {
 
@@ -26,8 +27,10 @@ public class WebDriverFactory extends BasePooledObjectFactory<RemoteWebDriver> {
 
 		RemoteWebDriver driver = new RemoteWebDriver(new URL(SELENIUM_URL), dc);
 
-		//driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-		//driver.manage().timeouts().pageLoadTimeout(1, TimeUnit.MINUTES);
+		driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+		driver.manage().timeouts().pageLoadTimeout(5, TimeUnit.SECONDS);
+		driver.manage().timeouts().setScriptTimeout(5, TimeUnit.SECONDS);
+
 		LOGGER.info("Creating new remote driver: session "+driver.getSessionId());
 		return driver;
 	}
