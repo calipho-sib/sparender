@@ -75,10 +75,9 @@ public class SeleniumRenderer implements Renderer {
 				driverPool.invalidateObject(webDriver);
 
 				try {
-					webDriver.close();
 					webDriver.quit();
 				} catch (Exception e2) {
-					LOGGER.error("Fails to properly close session " + webDriver.getSessionId() + ": " + ExceptionUtils.getStackTrace(e));
+					LOGGER.error("Fails to properly destroy session " + webDriver.getSessionId() + ": " + ExceptionUtils.getStackTrace(e));
 				}
 				return render(requestedUrl, attemptCount + 1);
 			}
