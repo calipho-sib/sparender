@@ -60,7 +60,7 @@ public class SeleniumRenderer implements Renderer {
 
 			//Should get the result within the given time. Otherwise a timeout is thrown and the driver invalidated.
 			Future<String> future = timeoutExecutorService.submit(c);
-			String content = future.get(20, TimeUnit.MINUTES);
+			String content = future.get(8, TimeUnit.MINUTES);
 
 			driverPool.returnObject(webDriver);
 
@@ -73,6 +73,7 @@ public class SeleniumRenderer implements Renderer {
 
 				LOGGER.error("Session " + webDriver.getSessionId() + " died or was timeout : " + ExceptionUtils.getStackTrace(e));
 				driverPool.invalidateObject(webDriver);
+				LOGGER.error(webDriver.getSessionId() + " is not valid anymore");
 
 				try {
 					webDriver.quit();
