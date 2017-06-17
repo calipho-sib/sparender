@@ -4,20 +4,23 @@ Used for SEO optimisation (solving problems related to technology such as: Angul
 
 
 Build
-```
+```shell
 mvn package
 ```
-```
+
 
 Access the machine  (nextp-vm2b)
 
-Run selenium server (nextp-vm2b)
-```shell 
-docker ps (to kill any previous instance)
+Stop current container and restart selenium server (nextp-vm2b)
+
+```shell
+docker ps (to check ids and stop any previous instance)
 docker run -d --rm --name chrome --shm-size=1024m --cap-add=SYS_ADMIN --add-host=old.nextprot.org:127.0.0.1 -p=127.0.0.1:4444:4444   yukinying/chrome-headless-browser-selenium
 ```
+
 Run sparender (nextp-vm2b)
-```
+
+```shell
 nohup java -Xmx2g -Dcom.sun.management.jmxremote.port=5000 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dehcache.path=/work/sparender/cache -jar /work/sparender/dist/app.jar &> /work/sparender/logs.txt &
 ```
 
