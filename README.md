@@ -14,7 +14,8 @@ Access the machine  (nextp-vm2b)
 Stop current container and restart selenium server (nextp-vm2b)
 
 ```shell
-docker ps (to check ids and stop any previous instance)
+docker ps #to check CONTAINER_ID of the running instance
+docker stop $CONTAINER_ID
 docker run -d --rm --name chrome --shm-size=2048m --cap-add=SYS_ADMIN --add-host=old.nextprot.org:127.0.0.1 -p=127.0.0.1:4444:4444   yukinying/chrome-headless-browser-selenium
 ```
 
