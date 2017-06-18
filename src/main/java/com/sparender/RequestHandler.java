@@ -111,13 +111,7 @@ public class RequestHandler extends AbstractHandler implements Handler {
 	}
 
 
-	private Object medicalObject = new Object();
 	private synchronized Object getLockingObject(String requestedUrl) {
-
-		//Always the same object if it contains medical
-		if(requestedUrl.contains("medical")){
-			return medicalObject;
-		}
 
 		//TODO evaluate the memory of this. Do we need to run a recycling here?
 		if(!lockedUrls.containsKey(requestedUrl)){
