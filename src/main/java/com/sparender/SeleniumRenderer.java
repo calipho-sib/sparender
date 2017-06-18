@@ -47,7 +47,7 @@ public class SeleniumRenderer implements Renderer {
 
 		Thread.sleep(attemptCount * 1000);
 
-		if(attemptCount > 2){
+		if(attemptCount > 3){
 			LOGGER.error("Total disaster:  Reached the maximum number of attempts for " + requestedUrl);
 			throw new RuntimeException("Total disaster:  Reached the maximum attempts for " + requestedUrl);
 		}
