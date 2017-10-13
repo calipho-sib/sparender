@@ -16,7 +16,7 @@ Stop current container and restart selenium server (nextp-vm2b)
 ```shell
 docker ps #to check CONTAINER_ID of the running instance
 docker stop $CONTAINER_ID
-docker run --name selenium3 -d -p 4444:4444 -p 5900:5900 -e JAVA_OPTS=-Xmx2048m --add-host=old.nextprot.org:127.0.0.1 --add-host=www.google-analytics.com:127.0.0.1 -v /dev/shm:/dev/shm selenium/standalone-chrome:3.4.0-dysprosium
+docker run --name selenium5 -d -p 4444:4444 -p 5900:5900 -e JAVA_OPTS=-Xmx2048m --add-host=old.nextprot.org:127.0.0.1 --add-host=www.google-analytics.com:127.0.0.1 -v /dev/shm:/dev/shm selenium/standalone-chrome:3.4.0-dysprosium
 
 #Other selenium configuration
 #docker run -d --rm --name selenium1 --shm-size=2048m --cap-add=SYS_ADMIN --add-host=old.nextprot.org:127.0.0.1 --add-host=www.google-analytics.com:127.0.0.1 -p=127.0.0.1:4444:4444   yukinying/chrome-headless-browser-selenium
